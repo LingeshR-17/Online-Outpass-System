@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Outpass - Student Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="student-style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Online Outpass System</h1>
+    <nav>
+      <a href="request.html" class="nav-btn">Request Outpass</a>
+    </nav>
+  </header>
+
+<div id="student-info" class="student-info">
+</div>
+
+<script>
+  
+  const student = {
+    name: "LINGESH R",
+    classSec: "CSE-I",
+    rollNo: "25CSI032"
+  };
+
+  const infoDiv = document.getElementById('student-info');
+  infoDiv.innerHTML = `Student: ${student.name} | Class: ${student.classSec} | Roll No: ${student.rollNo}`;
+</script>
+
+  <main class="container">
+    <section class="panel">
+      <h2>Your Requests</h2>
+      <div id="student-info" class="muted"></div>
+      <table id="requests-table" class="table">
+        <thead>
+          <tr>
+            <th>S.no</th>
+            <th>Out Date</th>
+            <th>Out Time</th>
+            <th>In Date</th>
+            <th>In Time</th>
+            <th>Reason</th>
+            <th>Status (Advisor / HOD / Warden)</th>
+            <th>E-pass</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+   
+    App.init('student'); 
+  </script>
+</body>
+</html>

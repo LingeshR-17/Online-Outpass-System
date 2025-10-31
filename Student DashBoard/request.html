@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Request Outpass</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="student-style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Raise Outpass</h1>
+    <nav>
+      <a href="student.html" class = "nav-btn">Back to Check Status
+      </a>
+    </nav>
+  </header>
+
+  <main class="container" class = "request-cont">
+    <section class="panel form-panel" >
+      <form id="outpass-form" >
+        <div class="row">
+          <label>Student Name<input type="text" id="studentName" required></label>
+          <label>Room Number<input type="text" id="roll" required></label>
+        </div>
+        <div class="row">
+          <label>Class / Section<input type="text" id="classSection" required></label>
+          <label>Phone Number<input type="tel" id="phone" required></label>
+        </div>
+
+        <fieldset>
+          <legend>Outpass Timing</legend>
+          <div class="row">
+            <label>Out Date<input type="date" id="outDate" required></label>
+            <label>Out Time<input type="time" id="outTime" required></label>
+          </div>
+          <div class="row">
+            <label>In Date<input type="date" id="inDate" required></label>
+            <label>In Time<input type="time" id="inTime" required></label>
+          </div>
+        </fieldset>
+
+        <label>Reason for Leave
+          <textarea id="reason" rows="4" required placeholder="Short justification..."></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="Submit-btn">Submit Request</button>
+          <a href="student.html" class="Cancel-btn">Cancel</a>
+        </div>
+        <div id="form-msg" class="muted"></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    App.attachOutpassForm();
+  </script>
+</body>
+</html>
