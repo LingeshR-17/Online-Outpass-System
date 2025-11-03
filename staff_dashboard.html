@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Staff Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="brand">🏫 Outpass Portal</div>
+      <nav class="nav-links"><a href="index.html">Home</a><a href="staff_login.html">Logout</a></nav>
+    </header>
+
+    <main style="margin-top:18px;">
+      <div class="card">
+        <h2>Pending Outpass Requests</h2>
+        <p style="color:var(--muted)">Approve or reject student requests below.</p>
+
+        <table class="table">
+          <thead>
+            <tr><th>ID</th><th>Student</th><th>Reason</th><th>From</th><th>To</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <!-- Static demo rows -->
+            <tr>
+              <td>#12</td><td>20XXBCS001</td><td>Home Visit</td><td>2025-10-20</td><td>2025-10-22</td>
+              <td><span class="status pending">PENDING</span></td>
+              <td>
+                <a class="btn" href="#" style="background:#059669">Approve</a>
+                <a class="btn" href="#" style="background:#ef4444; margin-left:6px;">Reject</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>#09</td><td>20XXBCS007</td><td>Medical</td><td>2025-09-02</td><td>2025-09-05</td>
+              <td><span class="status approved">APPROVED</span></td>
+              <td><a class="btn" href="verify.html">View QR</a></td>
+            </tr>
+
+            <tr>
+              <td>#07</td><td>20XXBCS011</td><td>Personal</td><td>2025-08-18</td><td>2025-08-18</td>
+              <td><span class="status rejected">REJECTED</span></td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <footer class="footer">© 2025 College Outpass System</footer>
+  </div>
+</body>
+</html>
