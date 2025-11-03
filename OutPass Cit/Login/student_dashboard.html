@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="navbar">
+      <div class="brand">🏫 Outpass Portal</div>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="student_login.html">Logout</a>
+      </nav>
+    </header>
+
+    <main style="margin-top:18px;">
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:18px">
+        <section class="card">
+          <h2>Apply for Outpass</h2>
+          <p style="color:var(--muted)">Fill details below and submit your request.</p>
+          <form class="form" action="/student-dashboard" method="POST">
+            <label>Reason</label>
+            <input name="reason" type="text" placeholder="Home visit / Medical / Personal" required>
+
+            <label>Destination</label>
+            <input name="destination" type="text" placeholder="Home address / City" required>
+
+            <label>From</label>
+            <input name="from_date" type="date" required>
+
+            <label>To</label>
+            <input name="to_date" type="date" required>
+
+            <label>Additional notes (optional)</label>
+            <textarea name="notes" rows="3" placeholder="Any other details"></textarea>
+
+            <button class="btn" type="submit">Submit Request</button>
+          </form>
+        </section>
+
+        <aside class="card">
+          <h3>Your Recent Outpasses</h3>
+          <table class="table">
+            <thead>
+              <tr><th>ID</th><th>Reason</th><th>From</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <!-- Example static rows (backend will populate dynamically) -->
+              <tr><td>#12</td><td>Home Visit</td><td>2025-10-20</td><td><span class="status approved">APPROVED</span></td></tr>
+              <tr><td>#07</td><td>Medical</td><td>2025-09-02</td><td><span class="status rejected">REJECTED</span></td></tr>
+              <tr><td>#03</td><td>Personal</td><td>2025-08-18</td><td><span class="status pending">PENDING</span></td></tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:12px;">
+            <a class="btn" href="verify.html">View QR / Verification</a>
+            <a class="btn" href="index.html" style="background:#6b7280;margin-left:8px;">Logout</a>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="footer">© 2025 College Outpass System</footer>
+  </div>
+</body>
+</html>
