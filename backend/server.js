@@ -12,7 +12,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Rate limiter: 5 requests per 15 mins for the notification endpoint
 const notifyLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
+    windowMs: 15 * 60 * 1000,
     max: 5,
     message: { error: 'Too many requests. Please try again after 15 minutes.' },
     standardHeaders: true,
@@ -32,18 +32,13 @@ app.use(express.json());
 const transporter = nodemailer.createTransport({
     service: 'gmail', // You can use other services
     auth: {
-        user: process.env.EMAIL_USER ,
-        pass: process.env.EMAIL_PASS 
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
-app.post('/api/notify-parent', notifyLimiter, async (req, res) => {
+app.post('/api/notify-parent', async (req, res) => {
     const { outpassId, studentName, parentEmail } = req.body;
-
-    if (!outpassId || !studentName || !parentEmail) {
-        return res.status(400).json({ error: 'Missing required fields (outpassId, studentName, parentEmail).' });
-    }
-
 
     const approveLink = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=approve`;
     const rejectLink = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=reject`;
@@ -79,10 +74,30 @@ app.post('/api/notify-parent', notifyLimiter, async (req, res) => {
         res.status(500).json({ error: 'Failed to send email. Ensure you have set up EMAIL_USER and EMAIL_PASS in .env.' });
     }
 });
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     res.send("Running successfully");
 });
 
-app.listen(PORT, () => {
-    console.log(`Backend Server is running on port: ${PORT}`);
+// Diagnostic Route: Test Email from Browser
+app.get('/test-email', async (req, res) => {
+    console.log('🧪 Diagnostic: Manual Email Test Triggered');
+    const testMail = {
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER, // Send to self
+        subject: 'Diagnostic Test Email',
+        text: 'If you see this, your backend email configuration is working perfectly!'
+    };
+
+    try {
+        await transporter.sendMail(testMail);
+        res.send('<h1>✅ Success!</h1><p>Test email sent to yourself. Check your inbox.</p>');
+    } catch (err) {
+        console.error('❌ Diagnostic Failed:', err.message);
+        res.status(500).send(`<h1>❌ Email Failed</h1><p>Error: ${err.message}</p><p>Check your Render Logs for details.</p>`);
+    }
 });
+
+app.listen(PORT, () => {
+    console.log(`🚀 API running on port ${PORT}`);
+});
+
