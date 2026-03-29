@@ -178,7 +178,15 @@ const HodDashboard = () => {
                                         <td>{user.registerNo || 'N/A'}</td>
                                         <td>{user.email}</td>
                                         <td style={{textTransform: 'capitalize'}}>{user.role}</td>
-                                        <td>{user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
+                                        <td>
+                                            {(() => {
+                                                if (!user.createdAt) return 'N/A';
+                                                // Handle Firestore Timestamp {seconds, nanoseconds}
+                                                if (user.createdAt.seconds) return new Date(user.createdAt.seconds * 1000).toLocaleDateString();
+                                                // Handle ISO String from Register.jsx
+                                                return new Date(user.createdAt).toLocaleDateString();
+                                            })()}
+                                        </td>
                                         <td>
                                             <button disabled={btnLoading === user.id} className="btn approve" style={{marginRight: '5px'}} onClick={() => handleUserApproval(user.id, 'approve')}>
                                                 {btnLoading === user.id ? '...' : 'Approve'}
@@ -195,6 +203,7 @@ const HodDashboard = () => {
                                 </tr>
                             )}
                         </tbody>
+
                     </table>
                 </div>
                 )}
