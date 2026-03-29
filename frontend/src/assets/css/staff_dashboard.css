@@ -1,0 +1,105 @@
+:root {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --accent: #2563eb;
+  --muted: #6b7280;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --pending: #f59e0b;
+  --shadow: rgba(0,0,0,0.08);
+  --radius: 10px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: #111;
+}
+
+
+.brand {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.nav-links a {
+  color: white;
+  margin-left: 18px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* Main Card */
+.staff-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.card {
+  width: 90%;
+  max-width: 1100px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px var(--shadow);
+  padding: 24px;
+}
+
+.card h2 {
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table thead {
+  background: #eef2ff;
+}
+
+.table th, .table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: white;
+  font-size: 0.85rem;
+}
+
+.status.pending { background: var(--pending); }
+.status.approved { background: var(--success); }
+.status.rejected { background: var(--danger); }
+
+/* Buttons */
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.btn.approve { background: var(--success); }
+.btn.reject { background: var(--danger); }
+.btn:hover { opacity: 0.8; }
+
+/* Footer is inherited from style.css */

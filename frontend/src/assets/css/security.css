@@ -1,0 +1,9 @@
+/* security.css */
+.container-sec{  margin:18px auto; padding:16px }
+.card-sec{ padding:16px; border-radius:10px; background:var(--card); box-shadow:0 6px 18px rgba(15,23,42,0.04) }
+input[type="text"]{ width:100%; padding:10px; border-radius:8px; border:1px solid #e6e9ef; margin-top:8px }
+.result{ margin-top:12px; padding:12px; border-radius:8px }
+.ok{ background:#e6fff2; color:#007a3d; padding:10px; border-radius:8px }
+.blocked{ background:#fff0f0; color:#9b1c1c; padding:10px; border-radius:8px }
+.muted{ color:var(--muted) }
+.btn{ background:var(--accent); color:white; padding:8px 12px; border:0; border-radius:8px; cursor:pointer; }

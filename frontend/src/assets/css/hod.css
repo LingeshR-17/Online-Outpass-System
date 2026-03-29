@@ -1,0 +1,87 @@
+/* hod.css — styles only for HOD Dashboard */
+
+/* Page layout */
+.hod-dashboard {
+  margin-top: 25px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Header */
+.hod-dashboard h2 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+
+.hod-dashboard p {
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+/* Table */
+.hod-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.hod-table th, .hod-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.hod-table th {
+  background: #f8fafc;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn-approve {
+  background: #059669;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-reject {
+  background: #ef4444;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: 0.2s;
+}
+
+.btn-approve:hover,
+.btn-reject:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+/* Status labels */
+.status.approved {
+  background: #e6fffa;
+  color: #065f46;
+}
+
+.status.pending {
+  background: #fff7ed;
+  color: #92400e;
+}
+
+.status.rejected {
+  background: #ffeded;
+  color: #991b1b;
+}
+
+/* Footer is inherited from style.css */

@@ -1,0 +1,280 @@
+/* ================================
+   GLOBAL VARIABLES
+================================ */
+:root {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --pending: #fbbf24;
+  --approved-bg: #dcfce7;
+  --pending-bg: #fef9c3;
+  --rejected-bg: #fee2e2;
+}
+
+* {
+  font-size: 20px;
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, Arial, sans-serif;
+}
+
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #111;
+}
+
+.topbar {
+  background: white;
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.topbar nav a {
+  object-fit: right;
+  color: white;
+  font-weight: bold;
+  margin-left: 12px;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: 0.3s ease;
+}
+
+
+.nav-btn {
+  display:inline-block;
+  background:linear-gradient(var(--accent),rgb(0, 179, 255));
+  color:white;
+  padding:10px 14px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:600;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+
+
+.nav-btn:hover {
+ transform:translateY(-3px); box-shadow:0 8px 24px rgba(37,99,235,0.12)
+}
+
+.student-info {
+    background-color: #f0f4f8;
+    text-align: center;
+    padding: 12px 20px;
+    margin: 10px 0;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #111827;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+.container-stud {
+ 
+  margin: 0 auto;
+  margin-top: 20px;
+  padding: 0 16px;
+  text-align: center;
+  display: grid;
+  gap: 18px;
+}
+
+.panel {
+  background: var(--card);
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  width: 100%;
+}
+
+.panel h2 {
+ background:linear-gradient(var(--accent),rgb(0, 179, 255));
+   color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 20px;
+  margin-top: 0;
+}
+
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.table thead th {
+  font-weight: 600;
+  text-align: center;
+  padding: 14px;
+  border-bottom: 2px solid #e5e7eb;
+  background:#eef2ff;
+}
+
+.table tbody td {
+  border-bottom: 1px solid #f3f6fb;
+  text-align: center; 
+}
+
+/* Request status colors */
+
+.status.approved {
+  background-color: var(--approved-bg);
+  color: var(--success);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.status.pending {
+  background-color: var(--pending-bg);
+  color: #a16207;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.status.rejected {
+  background-color: var(--rejected-bg);
+  color: var(--danger);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+.status-cell{
+  padding-left: 50px;
+  margin:none;
+}
+
+/* ================================
+   FORM PANEL (for request.html)
+================================ */
+.form-panel{
+    background-color:rgb(253, 243, 231);
+}
+.form-panel label {
+  display: block;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.form-panel input,
+.form-panel textarea,
+.form-panel select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e6edf6;
+  margin-top: 6px;
+  font-size: 15px;
+  background: #fff;
+}
+
+.form-panel input:focus,
+.form-panel textarea:focus,
+.form-panel select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  border-color: var(--accent);
+}
+
+/* Fieldset + Legend */
+.form-panel fieldset {
+  border: 1px dashed #e9f1ff;
+  padding: 10px;
+  border-radius: 6px;
+  margin: 10px 0;
+  text-align: left;
+}
+
+.form-panel legend {
+  padding: 0 6px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Row layout */
+.row {
+  display: flex;
+  gap: 12px;
+}
+.row label {
+  flex: 1;
+}
+
+/* ================================
+   BUTTONS (Shared)
+================================ */
+
+.action-btn{
+  background: var(--accent);
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+.Submit-btn {
+  background: var(--accent);
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+.Submit-btn:hover {
+  background-color: white;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.Cancel-btn {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid #e6eefc;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+.Cancel-btn:hover {
+  background-color: var(--accent);
+  color: white;
+}
+
+/* ================================
+   FORM ACTIONS + MESSAGES
+================================ */
+.actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+#form-msg {
+  margin-top: 10px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 14px;
+}
