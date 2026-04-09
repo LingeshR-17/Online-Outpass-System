@@ -12,27 +12,48 @@ const TeacherDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [btnLoading, setBtnLoading] = useState(null);
 
-  useEffect(() => {
-    const myDept = localStorage.getItem('department');
-    const mySec = localStorage.getItem('section');
-    
-    let q = query(collection(db, 'outpasses'), where('status.advisor', '==', 'Pending'));
-    
-    if (myDept && mySec) {
-      q = query(
-        collection(db, 'outpasses'), 
-        where('status.advisor', '==', 'Pending'),
-        where('department', '==', myDept),
-        where('section', '==', mySec)
-      );
-    }
+  const [authLoading, setAuthLoading] = useState(true);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRequests(fetched);
+  useEffect(() => {
+    let unsubscribeSnapshot = null;
+
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        const myDept = localStorage.getItem('department');
+        const mySec = localStorage.getItem('section');
+        
+        // Start with a base query
+        let q = query(collection(db, 'outpasses'), where('status.advisor', '==', 'Pending'));
+        
+        // Refine if dept/sec known
+        if (myDept && mySec) {
+          q = query(
+            collection(db, 'outpasses'), 
+            where('status.advisor', '==', 'Pending'),
+            where('department', '==', myDept),
+            where('section', '==', mySec)
+          );
+        }
+
+        unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+          const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setRequests(fetched);
+        }, (error) => {
+          console.error("Error fetching requests:", error);
+        });
+
+        setAuthLoading(false);
+      } else {
+        setAuthLoading(false);
+        navigate('/');
+      }
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      unsubscribeAuth();
+    };
+  }, [navigate]);
 
   const filteredRequests = requests.filter(req => {
     const term = searchTerm.toLowerCase();
@@ -62,8 +83,10 @@ const TeacherDashboard = () => {
         await updateDoc(docRef, {
           'status.parent': 'Approved'
         });
+        alert("✅ Parent status overridden successfully!");
       } catch (error) {
         console.error("Error overriding parent status:", error);
+        alert("❌ Failed to override status. Check connection.");
       }
       setBtnLoading(null);
     }
@@ -76,13 +99,26 @@ const TeacherDashboard = () => {
       await updateDoc(docRef, {
         'status.advisor': action === 'approve' ? 'Approved' : 'Rejected'
       });
+      alert(`✅ Request ${action === 'approve' ? 'Approved' : 'Rejected'}!`);
     } catch (error) {
       console.error("Error updating:", error);
-      alert("Failed to update status");
+      alert("❌ Failed to update status.");
     }
     setBtnLoading(null);
   };
 
+
+  if (authLoading) {
+    return (
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '4px solid #f3f3f3', borderTop: '4px solid #2563eb', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }}></div>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <p style={{ color: '#4b5563', fontWeight: '500' }}>Initializing secure staff session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -174,7 +210,7 @@ const TeacherDashboard = () => {
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="8" style={{ textAlign: 'center' }}>No requests found matching your search.</td></tr>
+                <tr><td colSpan="9" style={{ textAlign: 'center' }}>No requests found matching your search.</td></tr>
               )}
             </tbody>
           </table>

@@ -8,16 +8,37 @@ import '../assets/css/style.css';
 const Login = () => {
   const navigate = useNavigate();
 
-  // Auto-redirect if already logged in
+  // Auto-redirect and session sync
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    if (role) {
-      if (role === 'student') navigate('/student');
-      else if (role === 'class_advisor') navigate('/teacher');
-      else if (role === 'hod') navigate('/hod');
-      else if (role === 'warden') navigate('/warden');
-      else if (role === 'security') navigate('/security');
-    }
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        console.log('🔄 Auth detected in Login, checking Firestore...');
+        // Try to get role from localStorage first for speed
+        let role = localStorage.getItem('role');
+        
+        // If no role in local or we want to be sure, fetch from Firestore
+        if (!role) {
+          const userSnap = await getDoc(doc(db, 'user', user.uid));
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            role = (userData.role || '').trim().toLowerCase();
+            localStorage.setItem('role', role);
+            localStorage.setItem('name', userData.name || 'User');
+            // ... populate other fields if needed ...
+          }
+        }
+
+        if (role) {
+          console.log(`🚀 Auto-redirecting to /${role}`);
+          if (role === 'student') navigate('/student');
+          else if (role === 'class_advisor') navigate('/teacher');
+          else if (role === 'hod') navigate('/hod');
+          else if (role === 'warden') navigate('/warden');
+          else if (role === 'security') navigate('/security');
+        }
+      }
+    });
+    return () => unsubscribe();
   }, [navigate]);
 
   const [email, setEmail] = useState('');

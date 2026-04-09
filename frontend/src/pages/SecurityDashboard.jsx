@@ -13,8 +13,23 @@ const SecurityDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [errorCode, setErrorCode] = useState('');
 
+  const [authLoading, setAuthLoading] = useState(true);
+
   useEffect(() => {
-    if (outpassData) return;
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setAuthLoading(false);
+      } else {
+        setAuthLoading(false);
+        navigate('/');
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (authLoading || outpassData) return;
     const targetNode = document.getElementById("reader");
     if (!targetNode) return;
 
@@ -103,6 +118,18 @@ const SecurityDashboard = () => {
     localStorage.clear();
     navigate('/');
   };
+
+  if (authLoading) {
+    return (
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0f172a' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '4px solid #1e293b', borderTop: '4px solid #3b82f6', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }}></div>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <p style={{ color: '#94a3b8', fontWeight: '500' }}>Initializing secure gate session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{backgroundColor: '#0f172a', minHeight: '100vh', padding: '0', margin: '0', maxWidth: '100%'}}>

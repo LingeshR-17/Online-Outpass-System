@@ -71,10 +71,11 @@ const RequestOutpass = () => {
         createdAt: serverTimestamp()
       });
 
-      // Hit our Node backend to send Email and SMS
+      // Hit our Node backend to send parent notification email
+      let emailSent = false;
       try {
         const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-        await fetch(`${BACKEND_URL}/api/notify-parent`, {
+        const emailRes = await fetch(`${BACKEND_URL}/api/notify-parent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -84,11 +85,21 @@ const RequestOutpass = () => {
             parentsMobileNo: formData.parentsMobileNo
           })
         });
+        if (emailRes.ok) {
+          emailSent = true;
+        } else {
+          const err = await emailRes.json().catch(() => ({}));
+          console.error('Email API error:', err);
+        }
       } catch (err) {
-        console.error('Backend notification failed (is backend running?):', err);
+        console.error('Backend notification failed (CORS or network):', err);
       }
 
-      alert('Outpass request submitted! Parent has been notified.');
+      if (emailSent) {
+        alert('Outpass request submitted! Parent has been notified via email.');
+      } else {
+        alert('Outpass request submitted! ⚠️ However, the parent email notification could not be sent. Please inform the parent manually.');
+      }
       navigate('/student');
     } catch (error) {
       console.error('Error securely submitting outpass:', error);

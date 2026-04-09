@@ -19,8 +19,21 @@ const notifyLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+const allowedOrigins = [
+    FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:5174',
+].filter(Boolean);
+
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: function (origin, callback) {
+        // Allow requests with no origin (e.g., curl, Postman, test-email route)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.some(o => origin.startsWith(o))) {
+            return callback(null, true);
+        }
+        return callback(new Error(`CORS: Origin ${origin} not allowed`));
+    },
     methods: ['GET', 'POST'],
     credentials: true
 }));

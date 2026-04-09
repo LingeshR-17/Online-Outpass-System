@@ -1,32 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import { auth, db } from '../firebase';
+import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import '../assets/css/hod.css';
 
 const HodDashboard = () => {
+    const navigate = useNavigate();
     const [requests, setRequests] = useState([]);
     const [pendingUsers, setPendingUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [btnLoading, setBtnLoading] = useState(null);
 
+    const [authLoading, setAuthLoading] = useState(true);
+
     useEffect(() => {
-        const usersQ = query(collection(db, 'user'), where('isApproved', '==', false));
-        const unsubscribeUsers = onSnapshot(usersQ, (snapshot) => {
-            const fetchedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setPendingUsers(fetchedUsers);
+        let unsubscribeUsers = null;
+        let unsubscribeOutpasses = null;
+
+        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+            if (user) {
+                const usersQ = query(collection(db, 'user'), where('isApproved', '==', false));
+                unsubscribeUsers = onSnapshot(usersQ, (snapshot) => {
+                    const fetchedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setPendingUsers(fetchedUsers);
+                }, (error) => console.error(error));
+
+                const q = query(collection(db, 'outpasses'), where('status.hod', '==', 'Pending'));
+                unsubscribeOutpasses = onSnapshot(q, (snapshot) => {
+                    const fetched = snapshot.docs
+                        .map(doc => ({ id: doc.id, ...doc.data() }))
+                        .filter(req => req.status?.advisor === 'Approved');
+                    setRequests(fetched);
+                }, (error) => console.error(error));
+
+                setAuthLoading(false);
+            } else {
+                setAuthLoading(false);
+                navigate('/');
+            }
         });
-        const q = query(collection(db, 'outpasses'), where('status.hod', '==', 'Pending'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetched = snapshot.docs
-               .map(doc => ({ id: doc.id, ...doc.data() }))
-               .filter(req => req.status?.advisor === 'Approved');
-            setRequests(fetched);
-        });
+
         return () => {
-            unsubscribe();
-            unsubscribeUsers();
+            if (unsubscribeUsers) unsubscribeUsers();
+            if (unsubscribeOutpasses) unsubscribeOutpasses();
+            unsubscribeAuth();
         };
-    }, []);
+    }, [navigate]);
+
+    const handleLogout = async () => {
+        await signOut(auth);
+        localStorage.clear();
+        navigate('/');
+    };
 
     const filteredRequests = requests.filter(req => {
         const term = searchTerm.toLowerCase();
@@ -75,6 +100,18 @@ const HodDashboard = () => {
     };
 
 
+    if (authLoading) {
+        return (
+            <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ border: '4px solid #f3f3f3', borderTop: '4px solid #2563eb', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }}></div>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                    <p style={{ color: '#4b5563', fontWeight: '500' }}>Initializing secure HOD session...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             {/* Navbar */}
@@ -84,8 +121,8 @@ const HodDashboard = () => {
                 </div>
                 <div className="brand">Online Outpass Management - CIT</div>
                 <nav className="nav-links">
-                    <a href="/">Home</a>
-                    <a href="/login" onClick={() => localStorage.clear()}>Logout</a>
+                    <button onClick={() => navigate('/')} className="nav-btn">Home</button>
+                    <button onClick={handleLogout} className="nav-btn">Logout</button>
                 </nav>
             </header>
 

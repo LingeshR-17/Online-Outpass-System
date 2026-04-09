@@ -12,28 +12,45 @@ const WardenDashboard = () => {
   const [btnLoading, setBtnLoading] = useState(null);
 
 
-  useEffect(() => {
-    const myHostel = localStorage.getItem('hostelName');
-    const myFloor = localStorage.getItem('hostelFloor');
-    
-    let q = query(collection(db, 'outpasses'), where('status.warden', '==', 'Pending'));
-    if (myHostel && myFloor) {
-      q = query(
-        collection(db, 'outpasses'), 
-        where('status.warden', '==', 'Pending'),
-        where('hostelName', '==', myHostel),
-        where('hostelFloor', '==', myFloor)
-      );
-    }
+  const [authLoading, setAuthLoading] = useState(true);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetched = snapshot.docs
-         .map(doc => ({ id: doc.id, ...doc.data() }))
-         .filter(req => req.status?.hod === 'Approved');
-      setRequests(fetched);
+  useEffect(() => {
+    let unsubscribeSnapshot = null;
+
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        const myHostel = localStorage.getItem('hostelName');
+        const myFloor = localStorage.getItem('hostelFloor');
+        
+        let q = query(collection(db, 'outpasses'), where('status.warden', '==', 'Pending'));
+        if (myHostel && myFloor) {
+          q = query(
+            collection(db, 'outpasses'), 
+            where('status.warden', '==', 'Pending'),
+            where('hostelName', '==', myHostel),
+            where('hostelFloor', '==', myFloor)
+          );
+        }
+
+        unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+          const fetched = snapshot.docs
+             .map(doc => ({ id: doc.id, ...doc.data() }))
+             .filter(req => req.status?.hod === 'Approved');
+          setRequests(fetched);
+        }, (error) => console.error(error));
+
+        setAuthLoading(false);
+      } else {
+        setAuthLoading(false);
+        navigate('/');
+      }
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      unsubscribeAuth();
+    };
+  }, [navigate]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -68,6 +85,18 @@ const WardenDashboard = () => {
     setBtnLoading(null);
   };
 
+
+  if (authLoading) {
+    return (
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '4px solid #f3f3f3', borderTop: '4px solid #2563eb', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }}></div>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <p style={{ color: '#4b5563', fontWeight: '500' }}>Initializing secure warden session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

@@ -17,13 +17,16 @@ const StudentDashboard = () => {
     rollNo: localStorage.getItem('registerNo') || "..."
   });
 
+  const [authLoading, setAuthLoading] = useState(true);
+
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      // 1. Fetch Student Profile to avoid N/A issues
-      const fetchProfile = async () => {
-        try {
-          const userDoc = await getDoc(doc(db, 'user', user.uid));
+    let unsubscribeSnapshot = null;
+
+    // onAuthStateChanged is the correct way to handle Firebase session initialization
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // 1. Fetch Student Profile asynchronously without blocking rendering
+        getDoc(doc(db, 'user', user.uid)).then(userDoc => {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setStudent({
@@ -31,32 +34,38 @@ const StudentDashboard = () => {
               classSec: `${userData.department || ''}-${userData.section || ''}`,
               rollNo: userData.registerNo || "N/A"
             });
-            // Update localStorage for other pages
             if (userData.registerNo) localStorage.setItem('registerNo', userData.registerNo);
           }
-        } catch (err) {
-          console.error("Error fetching student profile:", err);
-        }
-      };
-      fetchProfile();
+        }).catch(err => console.error("Error fetching student profile:", err));
 
-      // 2. Listen for outpass requests
-      const q = query(collection(db, 'outpasses'), where('studentId', '==', user.uid));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetched = snapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ...data,
-            status: `${data.status?.advisor || 'Pending'} / ${data.status?.hod || 'Pending'} / ${data.status?.warden || 'Pending'}`,
-            epass: (data.status?.warden === 'Approved') ? 'Approved' : 'N/A'
-          };
-        });
-        setRequests(fetched);
-      });
-      return () => unsubscribe();
-    }
-  }, []);
+        // 2. Listen for outpass requests
+        const q = query(collection(db, 'outpasses'), where('studentId', '==', user.uid));
+        unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+          const fetched = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              status: `${data.status?.advisor || 'Pending'} / ${data.status?.hod || 'Pending'} / ${data.status?.warden || 'Pending'}`,
+              epass: (data.status?.warden === 'Approved') ? 'Approved' : 'N/A'
+            };
+          });
+          setRequests(fetched);
+        }, (error) => console.error("Snapshot error:", error));
+
+        setAuthLoading(false);
+      } else {
+        // Redirect to login if no user found after initialization
+        setAuthLoading(false);
+        navigate('/');
+      }
+    });
+
+    return () => {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      unsubscribeAuth();
+    };
+  }, [navigate]);
 
 
   const handleLogout = async () => {
@@ -64,6 +73,18 @@ const StudentDashboard = () => {
     localStorage.clear();
     navigate('/');
   };
+
+  if (authLoading) {
+    return (
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ border: '4px solid #f3f3f3', borderTop: '4px solid #2563eb', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 15px' }}></div>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <p style={{ color: '#4b5563', fontWeight: '500' }}>Initializing secure session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
