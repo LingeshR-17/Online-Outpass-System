@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 require('dotenv').config();
 
 const rateLimit = require('express-rate-limit');
@@ -9,6 +9,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Initialise Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Rate limiter: 5 requests per 15 mins for the notification endpoint
 const notifyLimiter = rateLimit({
@@ -38,28 +41,13 @@ app.use(cors({
     credentials: true
 }));
 
-
 app.use(express.json());
 
-// Set up Nodemailer Transporter
-const transporter = nodemailer.createTransport({
-    service: 'gmail', // You can use other services
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
-app.post('/api/notify-parent', async (req, res) => {
-    const { outpassId, studentName, parentEmail } = req.body;
-
-    const approveLink = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=approve`;
-    const rejectLink = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=reject`;
-
-
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: parentEmail,
+// ─── Helper: Send parent approval email via Resend ───────────────────────────
+async function sendParentEmail({ to, studentName, approveLink, rejectLink }) {
+    return resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to,
         subject: `Outpass Approval Request for ${studentName}`,
         html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ccc; max-width: 600px;">
@@ -67,50 +55,61 @@ app.post('/api/notify-parent', async (req, res) => {
                 <p>Dear Parent,</p>
                 <p>Your child, <strong style="color: #2563eb;">${studentName}</strong>, has submitted an outpass request.</p>
                 <p>As part of the security protocol, we require your approval before the Class Advisor can process the request.</p>
-                
+
                 <div style="margin: 30px 0;">
                     <a href="${approveLink}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-right: 15px; font-weight: bold; display: inline-block;">Approve Request</a>
                     <a href="${rejectLink}" style="background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Reject Request</a>
                 </div>
-                
+
                 <p style="color: #666; font-size: 0.9em; line-height: 1.5;">If you did not authorize this, or if you have any questions, please contact the Class Advisor or the HOD immediately.</p>
             </div>
         `
-    };
+    });
+}
+
+// ─── POST /api/notify-parent ──────────────────────────────────────────────────
+app.post('/api/notify-parent', notifyLimiter, async (req, res) => {
+    const { outpassId, studentName, parentEmail } = req.body;
+
+    if (!outpassId || !studentName || !parentEmail) {
+        return res.status(400).json({ error: 'Missing required fields: outpassId, studentName, parentEmail' });
+    }
+
+    const approveLink = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=approve`;
+    const rejectLink  = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=reject`;
 
     try {
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Approval email successfully sent to ${parentEmail}`);
-        res.status(200).json({ message: 'Email and simulated SMS logged successfully' });
+        const result = await sendParentEmail({ to: parentEmail, studentName, approveLink, rejectLink });
+        console.log(`✅ Approval email sent to ${parentEmail}`, result);
+        res.status(200).json({ message: 'Email sent successfully', id: result.id });
     } catch (error) {
         console.error('❌ Error sending email:', error.message);
-        res.status(500).json({ error: 'Failed to send email. Ensure you have set up EMAIL_USER and EMAIL_PASS in .env.' });
+        res.status(500).json({ error: 'Failed to send email', details: error.message });
     }
 });
-app.get("/", (req, res) => {
-    res.send("Running successfully");
+
+// ─── Root health check ────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+    res.send('Running successfully');
 });
 
-// Diagnostic Route: Test Email from Browser
+// ─── Diagnostic route: test email from browser ────────────────────────────────
 app.get('/test-email', async (req, res) => {
     console.log('🧪 Diagnostic: Manual Email Test Triggered');
-    const testMail = {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER, // Send to self
-        subject: 'Diagnostic Test Email',
-        text: 'If you see this, your backend email configuration is working perfectly!'
-    };
-
     try {
-        await transporter.sendMail(testMail);
-        res.send('<h1>✅ Success!</h1><p>Test email sent to yourself. Check your inbox.</p>');
+        const result = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'lingeshprt2008@gmail.com',
+            subject: 'Diagnostic Test Email – Outpass Backend',
+            html: '<h1>✅ It works!</h1><p>Your Resend email configuration is working perfectly!</p>'
+        });
+        res.send(`<h1>✅ Success!</h1><p>Test email sent. Resend ID: <code>${result.id}</code></p><p>Check your inbox at lingeshprt2008@gmail.com</p>`);
     } catch (err) {
         console.error('❌ Diagnostic Failed:', err.message);
-        res.status(500).send(`<h1>❌ Email Failed</h1><p>Error: ${err.message}</p><p>Check your Render Logs for details.</p>`);
+        res.status(500).send(`<h1>❌ Email Failed</h1><p>Error: ${err.message}</p><p>Check your Render logs for details.</p>`);
     }
 });
 
 app.listen(PORT, () => {
     console.log(`🚀 API running on port ${PORT}`);
 });
-
