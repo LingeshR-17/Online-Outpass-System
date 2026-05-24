@@ -79,9 +79,13 @@ app.post('/api/notify-parent', notifyLimiter, async (req, res) => {
     const rejectLink  = `${FRONTEND_URL}/parent-approval?id=${outpassId}&action=reject`;
 
     try {
-        const result = await sendParentEmail({ to: parentEmail, studentName, approveLink, rejectLink });
-        console.log(`✅ Approval email sent to ${parentEmail}`, result);
-        res.status(200).json({ message: 'Email sent successfully', id: result.id });
+        const { data, error: resendError } = await sendParentEmail({ to: parentEmail, studentName, approveLink, rejectLink });
+        if (resendError) {
+            console.error('❌ Resend error:', resendError);
+            return res.status(500).json({ error: 'Failed to send email', details: resendError.message });
+        }
+        console.log(`✅ Approval email sent to ${parentEmail}`, data);
+        res.status(200).json({ message: 'Email sent successfully', id: data?.id });
     } catch (error) {
         console.error('❌ Error sending email:', error.message);
         res.status(500).json({ error: 'Failed to send email', details: error.message });
@@ -97,13 +101,17 @@ app.get('/', (req, res) => {
 app.get('/test-email', async (req, res) => {
     console.log('🧪 Diagnostic: Manual Email Test Triggered');
     try {
-        const result = await resend.emails.send({
+        const { data, error: resendError } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: 'lingeshprt2008@gmail.com',
             subject: 'Diagnostic Test Email – Outpass Backend',
             html: '<h1>✅ It works!</h1><p>Your Resend email configuration is working perfectly!</p>'
         });
-        res.send(`<h1>✅ Success!</h1><p>Test email sent. Resend ID: <code>${result.id}</code></p><p>Check your inbox at lingeshprt2008@gmail.com</p>`);
+        if (resendError) {
+            console.error('❌ Diagnostic Resend Error:', resendError);
+            return res.status(500).send(`<h1>❌ Email Failed</h1><p>Resend Error: ${resendError.message}</p>`);
+        }
+        res.send(`<h1>✅ Success!</h1><p>Test email sent. Resend ID: <code>${data?.id}</code></p><p>Check your inbox at lingeshprt2008@gmail.com</p>`);
     } catch (err) {
         console.error('❌ Diagnostic Failed:', err.message);
         res.status(500).send(`<h1>❌ Email Failed</h1><p>Error: ${err.message}</p><p>Check your Render logs for details.</p>`);
